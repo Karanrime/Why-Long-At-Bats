@@ -3,6 +3,8 @@ public class driver {
 
 	public static void main(String[] args) {
 		csvInverter inverter = new csvInverter();
+		inverter.createMaster();
+		/**
 		inverter.invertCSV("AllPitchesApr6-Apr10.csv");
 		inverter.invertCSV("AllPitchesApr11-Apr15.csv");
 		inverter.invertCSV("AllPitchesApr16-Apr20.csv");
@@ -38,6 +40,7 @@ public class driver {
 		inverter.invertCSV("AllPitchesSep14-Sep18.csv");
 		inverter.invertCSV("AllPitchesSep19-Sep23.csv");
 		inverter.invertCSV("AllPitchesSep24-Sep28.csv");
+		**/
 	}
 
 }
