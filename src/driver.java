@@ -4,8 +4,8 @@ public class driver {
 	public static void main(String[] args) {
 		csvInverter inverter = new csvInverter();
 		inverter.createMaster();
+		inverter.addToMaster("AllPitchesApr6-Apr10.csv");
 		/**
-		inverter.invertCSV("AllPitchesApr6-Apr10.csv");
 		inverter.invertCSV("AllPitchesApr11-Apr15.csv");
 		inverter.invertCSV("AllPitchesApr16-Apr20.csv");
 		inverter.invertCSV("AllPitchesApr21-Apr25.csv");
