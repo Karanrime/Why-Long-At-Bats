@@ -31,13 +31,14 @@ public class AtBatAggregator {
 	}
 	
 	public void writeFile(String str) {
-		numBalls = 0;
-		numStrikes = 0;
+		
 		try {
 			Scanner scanner = new Scanner(new File(str));
 			scanner.useDelimiter(",");
 			scanner.nextLine();
 			while (scanner.hasNext()) {
+				numBalls = 0;
+				numStrikes = 0;
 				for (int i = 0; i < 16; i++) {
 					if (i == 0) {
 						batterID = Integer.parseInt(scanner.next());
