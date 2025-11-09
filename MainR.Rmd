@@ -25,7 +25,7 @@ This analysis aims to determine what factors go into at-bat length specifically,
        y = 'Complete Games')
 ```
 
-This work, in addition to using the Sean Lahman database as demonstrated above, also makes extensive use of downloaded .csv files of Statcast data via Baseball Savant. The data cleaning was already done in java, R's job is to create the visuals and calculate the coorelations. 
+This work, in addition to using the Sean Lahman database as demonstrated above, makes extensive use of downloaded .csv files of Statcast data via Baseball Savant. The data cleaning was already done in java, R's job is to create the visuals and calculate correlations. 
 
 The final result of that data cleaning is a list of at-bats, with 17 variables I deemed worth keeping in the at-bat portion.
 
@@ -37,4 +37,12 @@ The final result of that data cleaning is a list of at-bats, with 17 variables I
 The head here shows the first six at-bats of the March 18th exhibition game in Tokyo. The Dodgers went down in order, and the only player to make it on base was Ian Happ with a walk to lead off the Cubs' half of the inning.
 
 Of course, pitch count - the subject of this analysis - was saved.
+
+```{r Pitch Count Bar}
+  AtBats %>%
+  ggplot(aes(x = Number.of.Pitches)) +
+  geom_bar()
+```
+
+Rather unsurprisingly, the number of pitches per at-bat falls off dramatically after six. The only way for an at-bat to continue going after six pitches is for the hitter to continually hit foul balls on a two-strike count, as a ball hit foul is not considered Strike Three. If foul balls did not functionally contribute, then the sixth pitch would always be on a 3-2 count, and the result of that pitch would always be a walk, strikeout, or ball in play. Thus, any at-bats longer than six pitches would necessarily require a player who can consistently foul off pitches. 
 
