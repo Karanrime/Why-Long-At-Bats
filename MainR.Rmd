@@ -1,0 +1,40 @@
+---
+title: "Why Long At Bats"
+author: "Ian Kramer"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(baseballr)
+library(Lahman)
+```
+
+There is one very important thing to notice about calculating the length of various at-bats: at-bat length has an incredibly high correlation with foul balls. This should be obvious: starting from a full count, the at-bat will end on any pitch result other than a (uncaught) foul "hit".
+
+This analysis aims to determine what factors go into at-bat length specifically, as the important outcome here for the sport of baseball is pitcher fatigue. In recent years, complete games have become a rarer and rarer instance as managers become more aggressive with switching out the bullpen (mitigated somewhat by Rule 5.10(g)(1)), and as pitch count becomes a more closely tracked statistic (anecdotally, I have heard of early 1900s games where 200-pitch outings were common and the measurement of fatigue was strictly performance) with which to determine when to remove a pitcher from the game. 
+
+```{r Complete Games Declining}
+  ggplot(data = Pitching, 
+         aes(x = yearID,
+             y = CG)) +
+  geom_jitter() +
+  labs(x = 'Year', 
+       y = 'Complete Games')
+```
+
+This work, in addition to using the Sean Lahman database as demonstrated above, also makes extensive use of downloaded .csv files of Statcast data via Baseball Savant. The data cleaning was already done in java, R's job is to create the visuals and calculate the coorelations. 
+
+The final result of that data cleaning is a list of at-bats, with 17 variables I deemed worth keeping in the at-bat portion.
+
+```{r Load Cleaned Data}
+  AtBats <- read.csv("2025RegularSeasonAllAtBats.csv")
+  head(AtBats)
+```
+
+The head here shows the first six at-bats of the March 18th exhibition game in Tokyo. The Dodgers went down in order, and Ian Happ led off the Cubs with a walk. 
+
+Of course, pitch count - the subject of this analysis - was saved.
+
