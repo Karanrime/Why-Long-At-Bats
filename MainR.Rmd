@@ -34,7 +34,7 @@ The final result of that data cleaning is a list of at-bats, with 17 variables I
   head(AtBats)
 ```
 
-The head here shows the first six at-bats of the March 18th exhibition game in Tokyo. The Dodgers went down in order, and Ian Happ led off the Cubs with a walk. 
+The head here shows the first six at-bats of the March 18th exhibition game in Tokyo. The Dodgers went down in order, and the only player to make it on base was Ian Happ with a walk to lead off the Cubs' half of the inning.
 
 Of course, pitch count - the subject of this analysis - was saved.
 

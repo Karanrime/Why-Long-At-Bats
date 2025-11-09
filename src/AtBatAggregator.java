@@ -37,8 +37,7 @@ public class AtBatAggregator {
 			scanner.useDelimiter(",");
 			scanner.nextLine();
 			while (scanner.hasNext()) {
-				numBalls = 0;
-				numStrikes = 0;
+				
 				for (int i = 0; i < 16; i++) {
 					if (i == 0) {
 						batterID = Integer.parseInt(scanner.next());
@@ -46,6 +45,8 @@ public class AtBatAggregator {
 							if (batterID != lastBatter) {
 								atBats.add(new AtBat(gameDate, batterName, lastBatter, pitcherID, batterHand, pitcherHand, gameID, numPitches, outcome, 
 										battingTeam, pitchingTeam, numBalls, numStrikes, contact, batterAge, pitcherAge));
+								numBalls = 0;
+								numStrikes = 0;
 							}
 						} catch (Exception e) {
 							
