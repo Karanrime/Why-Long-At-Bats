@@ -103,3 +103,8 @@ AggregatedOutcomes %>%
 ```
 The above graph, but using proportions rather than raw counts. Notably, for all reasonable numbers of pitches (n < 14), the chance of the batter being out decreases as the number goes up. 
 
+Anyway, on to some of the more pertinent preliminary analysis as to *how* this occurs in the first place. 
+
+```{r} 
+
+```
