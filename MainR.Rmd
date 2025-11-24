@@ -130,4 +130,42 @@ CombinedHands %>% ggplot(aes(y = Pitcher.Age, x = Number.of.Pitches)) +
   geom_jitter()
 ```
 
-Eh, may as well try. 
+Eh, may as well try. That was one of my other questions when first coming up with this project was how age related to stuff and these are not particularly exciting. 
+
+The final few starting analyses will be looking at a handful of teams to see if there are any notable differences between the handful of teams that I can think of. I doubt many of these will offer any new insights but in the off-chance they do, it'd be a wonderful opportunity to try and recreate the conditions that the specific team is building around. 
+
+For starters, the World Series Champion Dodgers:
+
+```{r} 
+AtBats[AtBats$Batting.Team == "LAD", ] %>%
+  ggplot(aes(x = Number.of.Pitches)) +
+  geom_bar()
+```
+
+Followed by the Toronto Blue Jays:
+
+```{r} 
+AtBats[AtBats$Batting.Team == "TOR", ] %>%
+  ggplot(aes(x = Number.of.Pitches)) +
+  geom_bar()
+```
+
+And then my favorite team, the Giants:
+
+```{r} 
+AtBats[AtBats$Batting.Team == "SF", ] %>%
+  ggplot(aes(x = Number.of.Pitches)) +
+  geom_bar()
+```
+
+No notable differences from what I could see, which means it's time to start doing some actual analyses. First off, some multiple linear regression, with the few variables we have that aren't either trivial relations or arbitrary. 
+
+```{r}
+basic.model <- lm(`Number.of.Pitches` ~ Pitcher.Hand + Pitcher.Age + Batter.Hand + Batter.Age + Contact, data=AtBats)
+summary(basic.model)
+```
+I'm actually quite surprised to see any significant figures, let alone four of them. With the BatterHand and BatterAge values though, I imagine this is a case of statistically significant but not practically significant, as right-handed hitters get -0.075 pitches per at-bat than left-handed hitters. Interesting? sure. Useful? no. 
+
+The only real interesting statistic here, other than an intercept of 4.76, is that at-bats where the batter puts the ball in play have 1.7 fewer pitches on average. On paper, this makes sense: batters who are more wont to make contact tend to be aggressive swingers and aggressive swingers likely would either hit or strike out, but I'm rather surprised it's that big of a difference, remembering the average is still less than 4. 
+
+One difficulty I'm noticing with my current implementation of the at-bat aggregation is that individual pitch data isn't actually tied to the at-bats - so next time I see this project is when I'm going to be doing that. There's a lot to be gleaned from that that was probably lost with the variables I chose to keep. 
