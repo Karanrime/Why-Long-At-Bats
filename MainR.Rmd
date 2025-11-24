@@ -105,6 +105,29 @@ The above graph, but using proportions rather than raw counts. Notably, for all 
 
 Anyway, on to some of the more pertinent preliminary analysis as to *how* this occurs in the first place. 
 
-```{r} 
+Firstly, what handedness tends to lead to longer at-bats?
 
+```{r} 
+CombinedHands <- AtBats %>%
+  mutate(Hands = paste("Pit:", Pitcher.Hand, "Bat:", Batter.Hand, sep = " "))
+
+CombinedHands %>% ggplot(aes(x = Number.of.Pitches, fill = Hands)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent)
+  
 ```
+
+The middle bars (representing matchups between a pitcher and batter with different handedness) get slightly taller as the number of pitches increases.
+This relation implodes at extreme values, but most relations do that...
+
+```{r} 
+CombinedHands %>% ggplot(aes(y = Batter.Age, x = Number.of.Pitches)) +
+  geom_jitter()
+```
+
+```{r} 
+CombinedHands %>% ggplot(aes(y = Pitcher.Age, x = Number.of.Pitches)) +
+  geom_jitter()
+```
+
+Eh, may as well try. 
