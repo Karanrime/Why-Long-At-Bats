@@ -20,10 +20,12 @@ public class AtBatAggregator {
 	private String pitchingTeam;
 	private int numBalls;
 	private int numStrikes;
-	boolean contact;
-	int batterAge;
-	int pitcherAge;
+	private boolean contact;
+	private int batterAge;
+	private int pitcherAge;
+	public static int atBatNumber = 0;
 	private ArrayList<AtBat> atBats;
+	private String line;
 	
 	public AtBatAggregator() {
 		atBats = new ArrayList<AtBat>();
@@ -33,46 +35,53 @@ public class AtBatAggregator {
 	public void writeFile(String str) {
 		
 		try {
+			PrintWriter writer = new PrintWriter(new File("2025RegularSeasonAllPitchesDivvied.csv"));
 			Scanner scanner = new Scanner(new File(str));
 			scanner.useDelimiter(",");
-			scanner.nextLine();
+			writer.write(scanner.nextLine() + ", AtBatID,,\n");
 			while (scanner.hasNext()) {
-				
-				for (int i = 0; i < 16; i++) {
+				line = "";
+				for (int i = 0; i < 105; i++) {
+					String nextItem = scanner.next();
+					line += nextItem + ",";
 					if (i == 0) {
-						batterID = Integer.parseInt(scanner.next());
+						batterID = Integer.parseInt(nextItem);
 						try {
 							if (batterID != lastBatter) {
 								atBats.add(new AtBat(gameDate, batterName, lastBatter, pitcherID, batterHand, pitcherHand, gameID, numPitches, outcome, 
-										battingTeam, pitchingTeam, numBalls, numStrikes, contact, batterAge, pitcherAge));
+										battingTeam, pitchingTeam, numBalls, numStrikes, contact, batterAge, pitcherAge, atBatNumber));
 								numBalls = 0;
 								numStrikes = 0;
+								atBatNumber += 1;
 							}
 						} catch (Exception e) {
-							
+							// NullPointerExpection when the lastBatter isn't defined yet. 
+							// We Intentionally do nothing here because we don't heed to do anything special to handle the first pitch of the season. 
 						} 
-					} else if (i == 1) {
-						gameDate = scanner.next();
-					} else if (i == 2) {
+					} else if (i == 3) { //date
+						gameDate = nextItem;
+					} else if (i == 7) { //name
 						// Had to split this one into two because the workaround to Excel hating me
 						// completely messed up the formatting on the name column. 
-						String a = scanner.next();
-						String b = scanner.next();
+						String a = nextItem;
+						nextItem = scanner.next();
+						String b = nextItem;
+						line += nextItem + ",";
 						batterName = a.substring(1) + "," + b.substring(0, b.length()-1);
-					} else if (i == 3) {
-						pitcherID = Integer.parseInt(scanner.next());
-					} else if (i == 4) {
-						outcome = scanner.next();
-					} else if (i == 5) {
-						batterHand = scanner.next();
-					} else if (i == 6) {
-						pitcherHand = scanner.next();
-					} else if (i == 7) {
-						pitchingTeam = scanner.next();
-					} else if (i == 8) {
-						battingTeam = scanner.next();
-					} else if (i == 9) {
-						String pitchType = scanner.next();
+					} else if (i == 8) { //pitcher
+						pitcherID = Integer.parseInt(nextItem);
+					} else if (i == 9) { //pitch result
+						outcome = nextItem;
+					} else if (i == 17) { //batter's hand
+						batterHand = nextItem;
+					} else if (i == 18) { //pitcher's hand
+						pitcherHand = nextItem;
+					} else if (i == 19) { //home team
+						pitchingTeam = nextItem;
+					} else if (i == 20) { //away team
+						battingTeam = nextItem;
+					} else if (i == 21) { //ball/strike
+						String pitchType = nextItem;
 						if (pitchType.equals("S")) {
 							numStrikes++;
 							contact = false;
@@ -82,31 +91,30 @@ public class AtBatAggregator {
 						} else {
 							contact = true;
 						}
-					} else if (i == 10) {
-						if (scanner.next().equals("Bot")) {
+					} else if (i == 36) { //swaps pitching and batting teams if it's the bottom half of the inning
+						if (nextItem.equals("Bot")) {
 							String team = pitchingTeam;
 							pitchingTeam = battingTeam;
 							battingTeam = team;
 						}
-					} else if (i == 11) {
-						gameID = Integer.parseInt(scanner.next());
-					} else if (i == 12) {
-						scanner.next();
-					} else if (i == 13) {
-						numPitches = Integer.parseInt(scanner.next());
-					} else if (i == 14) {
-						pitcherAge = Integer.parseInt(scanner.next()); 
-					} else if (i == 15) {
-						batterAge = Integer.parseInt(scanner.next());
+					} else if (i == 57) { //game ID
+						gameID = Integer.parseInt(nextItem);
+					} else if (i == 75) { //Pitch number
+						numPitches = Integer.parseInt(nextItem);
+					} else if (i == 101) { //pitcher age
+						pitcherAge = Integer.parseInt(nextItem); 
+					} else if (i == 102) { //batter age
+						batterAge = Integer.parseInt(nextItem);
 					}
 				}
-				scanner.nextLine();
+				line += scanner.nextLine() + atBatNumber + ",,\n";
+				writer.write(line);
 				lastBatter = batterID;
 			}
 			scanner.close();
-			PrintWriter writer = new PrintWriter(new File("2025RegularSeasonAllAtBats.csv"));
+			writer = new PrintWriter(new File("2025RegularSeasonAllAtBats.csv"));
 			writer.write("Game Date, Batter Last Name, Batter First Name ,Batter ID, PitcherID, Batter Hand, Pitcher Hand, Game ID, Number of Pitches, Outcome,"
-					+ "Batting Team, Pitching Team, Num Balls, Num Strikes, Contact, Batter Age, Pitcher Age \n");
+					+ "Batting Team, Pitching Team, Num Balls, Num Strikes, Contact, Batter Age, Pitcher Age, At Bat Number, DummyColumn \n");
 			for (AtBat atbat : atBats) {
 				writer.write(atbat.toString());
 			}
