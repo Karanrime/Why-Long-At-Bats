@@ -30,7 +30,8 @@ This work, in addition to using the Sean Lahman database as demonstrated above, 
 The final result of that data cleaning is a list of at-bats, with 17 variables I deemed worth keeping in the at-bat portion.
 
 ```{r Load Cleaned Data}
-  AtBats <- read.csv("2025RegularSeasonAllAtBats.csv")
+  AtBats <- read.csv("2025RegularSeasonAllAtBats.csv", 
+                     header=TRUE, sep=",")
   head(AtBats)
 ```
 
@@ -46,3 +47,209 @@ Of course, pitch count - the subject of this analysis - was saved.
 
 Rather unsurprisingly, the number of pitches per at-bat falls off dramatically after six. The only way for an at-bat to continue going after six pitches is for the hitter to continually hit foul balls on a two-strike count, as a ball hit foul is not considered Strike Three. If foul balls did not functionally contribute, then the sixth pitch would always be on a 3-2 count, and the result of that pitch would always be a walk, strikeout, or ball in play. Thus, any at-bats longer than six pitches would necessarily require a player who can consistently foul off pitches. 
 
+```{r numPitches summary stats}
+  AtBats$Number.of.Pitches %>%
+    summary()
+```
+
+The distribution is roughly normal, with a mean of 3.885, a median and mode of 4, and a necessary slight right skew simply because it's impossible to have an at-bat shorter than 1 pitch. The quartiles being asymmetrical was a bit of a scare but it makes sense given how dense the distribution is. 
+
+By the 1.5xIQR definition, any at-bat with a length of at least 10 pitches is an outlier, which seems rather high given the meat of this discussion involves at-bats of "only" at least 7. 
+
+The first thing we want to look at in-detail, rather than the causes, is actually the *effects* - specifically whether there's a difference in short-term batting outcome as a result of extended at-bats: the "battling back" factor. While in-depth analysis here will be saved for either late in this project or for a future project, there's still an important insight to be gleaned in whether or not extending at-bats actually creates a tangible effect. Clearly, there's the long-term effect outlined in the beginning, but that's much more difficult to assess given the other factors that lead into the decision to make a pitching change. 
+
+```{r Outcome by munPitches}
+  AggregatedOutcomes <- AtBats %>%
+    mutate(agOutcome = 
+      if_else(AtBats$Outcome == "catcher_interf", "Reach",
+      if_else(AtBats$Outcome == "double", "Hit",
+      if_else(AtBats$Outcome == "double_play", "Out",
+      if_else(AtBats$Outcome == "field_error", "Reach",
+      if_else(AtBats$Outcome == "field_out", "Out",
+      if_else(AtBats$Outcome == "fielders_choice", "Reach",
+      if_else(AtBats$Outcome == "fielders_choide_out", "Reach",
+      if_else(AtBats$Outcome == "force_out", "Out",
+      if_else(AtBats$Outcome == "grounded_into_double_play", "Out",
+      if_else(AtBats$Outcome == "hit_by_pitch", "Reach",
+      if_else(AtBats$Outcome == "home_run", "Hit",
+      if_else(AtBats$Outcome == "sac_bunt", "Out",
+      if_else(AtBats$Outcome == "sac_fly", "Out",
+      if_else(AtBats$Outcome == "sac_fly_double_Play", "Out",
+      if_else(AtBats$Outcome == "single", "Hit",
+      if_else(AtBats$Outcome == "strikeout", "Out",
+      if_else(AtBats$Outcome == "strikeout_double_play", "Out",
+      if_else(AtBats$Outcome == "triple", "Hit",
+      if_else(AtBats$Outcome == "triple_play", "Out",
+      if_else(AtBats$Outcome == "walk", "Walk", "Other")))))))))))))))))))))
+      
+
+    AggregatedOutcomes %>%
+  ggplot(aes(x = Number.of.Pitches, fill = agOutcome)) +
+  geom_bar()
+```
+
+The above graph aggregates all possible at-bat outcomes into four main categories: 
+- Hits, where the batter reaches base through their own capabilities.
+- Walks, where the batter is awarded first base for taking four balls. 
+- Outs, where the batter is called out.
+- Reaches, where the batter is awarded first base due to decisions or errors made by the opposing team. 
+
+Everything else is recorded as an "Other," which is rather irrelevant to the final outcome of the at-bat. 
+
+```{r OutcomesProportion}
+AggregatedOutcomes %>%
+  ggplot(aes(x = Number.of.Pitches, fill = agOutcome)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent)
+```
+The above graph, but using proportions rather than raw counts. Notably, for all reasonable numbers of pitches (n < 14), the chance of the batter being out decreases as the number goes up. 
+
+Anyway, on to some of the more pertinent preliminary analysis as to *how* this occurs in the first place. 
+
+Firstly, what handedness tends to lead to longer at-bats?
+
+```{r} 
+CombinedHands <- AtBats %>%
+  mutate(Hands = paste("Pit:", Pitcher.Hand, "Bat:", Batter.Hand, sep = " "))
+
+CombinedHands %>% ggplot(aes(x = Number.of.Pitches, fill = Hands)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent)
+  
+```
+
+The middle bars (representing matchups between a pitcher and batter with different handedness) get slightly taller as the number of pitches increases.
+This relation implodes at extreme values, but most relations do that...
+
+```{r} 
+CombinedHands %>% ggplot(aes(y = Batter.Age, x = Number.of.Pitches)) +
+  geom_jitter()
+```
+
+```{r} 
+CombinedHands %>% ggplot(aes(y = Pitcher.Age, x = Number.of.Pitches)) +
+  geom_jitter()
+```
+
+Eh, may as well try. That was one of my other questions when first coming up with this project was how age related to stuff and these are not particularly exciting. 
+
+The final few starting analyses will be looking at a handful of teams to see if there are any notable differences between the handful of teams that I can think of. I doubt many of these will offer any new insights but in the off-chance they do, it'd be a wonderful opportunity to try and recreate the conditions that the specific team is building around. 
+
+For starters, the World Series Champion Dodgers:
+
+```{r} 
+AtBats[AtBats$Batting.Team == "LAD", ] %>%
+  ggplot(aes(x = Number.of.Pitches)) +
+  geom_bar()
+```
+
+Followed by the Toronto Blue Jays:
+
+```{r} 
+AtBats[AtBats$Batting.Team == "TOR", ] %>%
+  ggplot(aes(x = Number.of.Pitches)) +
+  geom_bar()
+```
+
+And then my favorite team, the Giants:
+
+```{r} 
+AtBats[AtBats$Batting.Team == "SF", ] %>%
+  ggplot(aes(x = Number.of.Pitches)) +
+  geom_bar()
+```
+
+No notable differences from what I could see, which means it's time to start doing some actual analyses. First off, some multiple linear regression, with the few variables we have that aren't either trivial relations or arbitrary. 
+
+```{r}
+basic.model <- lm(`Number.of.Pitches` ~ Pitcher.Hand + Pitcher.Age + Batter.Hand + Batter.Age + Contact, data=AtBats)
+summary(basic.model)
+```
+I'm actually quite surprised to see any significant figures, let alone four of them. With the BatterHand and BatterAge values though, I imagine this is a case of statistically significant but not practically significant, as right-handed hitters get -0.075 pitches per at-bat than left-handed hitters. Interesting? sure. Useful? no. 
+
+The only real interesting statistic here, other than an intercept of 4.76, is that at-bats where the batter puts the ball in play have 1.7 fewer pitches on average. On paper, this makes sense: batters who are wont to make contact tend to be aggressive swingers and aggressive swingers likely would either hit or strike out, but I'm rather surprised it's that big of a difference, remembering the average is still less than 4. 
+
+One difficulty I'm noticing with my current implementation of the at-bat aggregation is that individual pitch data isn't actually tied to the at-bats. I will fix this soon, but right now I have one more surprise analysis to show...
+
+```{r highest average by player}
+  means <- group_by(AtBats, Batter.ID) %>%
+  summarize(m = mean(Number.of.Pitches))
+
+  means <- means[order(-means$m), ]
+  head(means)
+```
+Taking the means of all 673(!?) batters' at-bat lengths, we can also strive to link the biographical data shown in the Lahman database with those means, to see if there are any causes there. Or, that's what we would do, if the database stored StatcastID values, which it doesn't. 
+
+```{r 681909}
+  whoIs681909 <- AtBats[AtBats$Batter.ID == 681909, ]
+  head(whoIs681909)
+```
+
+Though, admittedly, we fall prey to the low sample size: the player with the highest average number of pitches per at-bat, Justin Dean (who is now a Giant, surprisingly enough), has a sample size of 2 at-bats and a batting average of 0.000 in the 2025 MLB season.
+
+Before we enter into causal relationships, there's one last coorelation piece that I think will prove the importance of at-bat length in the scope of baseball. 
+
+```{r obp}
+  obpraw <- mutate(AggregatedOutcomes,
+                   OnBase = if_else(AggregatedOutcomes$agOutcome == "Out", 0, 1))
+
+  means <- group_by(obpraw, Batter.ID) %>%
+  summarize(pit = mean(Number.of.Pitches), obp = mean(OnBase))
+```
+
+Rewriting our means with the AggregatedOutcomes frame allows us to also take the mean outcomes and create a batter's on-base percentage to tie in. Then, all we have to do is...
+
+```{r regression}
+  length.model <- lm(`obp` ~ pit, data=means)
+summary(length.model)
+
+  means %>%
+    ggplot(aes(x = pit, y = obp)) +
+    geom_point()
+```
+There's a clear (at least to me) slight positive trend between average number of pitches per at-bat an on-base percentage. There are definitely better explanatory variables out there, but to me this is a factor that should not be discarded, even with an r^2 of 0.01 - if only because the best measure of how pitch counts impact pitchers is simply the pitch count, because tired pitchers make more mistakes. 
+
+```{r regress2} 
+  length.deaggregated <- lm(`OnBase` ~ Number.of.Pitches, data = obpraw)
+  summary(length.deaggregated)
+```
+
+Running the regression with the raw instead of aggregated stats, a batter's chance of reaching base is increased by 0.46 percentage points per pitch in the at-bat. It's not a lot, and there are many, other, better explanatory features, but it's imperative to understand that baseball is a very streaky game. A change in one at-bat leads to changes in how the next one goes, and the one after that, and so on. 
+
+
+```{r}
+  AllPitches <- read.csv("2025RegularSeasonAllPitchesDivvied.csv")
+  head(AllPitches)
+```
+
+```{r}
+  AllPitches <- mutate(AllPitches, Extension = ifelse((description == "foul" & strikes == 2), 1, 0))
+  Extensions <- AllPitches[AllPitches$Extension == 1,]
+```
+
+```{r}
+ Extensions %>%
+  ggplot(aes(x = plate_x, y = plate_z, color = stand)) + 
+  geom_point()
+```
+
+```{r}
+  foullm <- lm(`Extension` ~ release_pos_x + release_pos_z + plate_x + plate_z + effective_speed + release_extension + release_spin_rate + stand + p_throws, data = AllPitches)
+  summary(foullm)
+```
+
+```{r}
+  allTogetherNow <- merge(x = AllPitches, y = AtBats, by.x = "AtBatID", by.y = "At.Bat.Number")
+  head(allTogetherNow)
+```
+
+```{r}
+  extlm <- lm(`Number.of.Pitches` ~ release_pos_x + release_pos_z + plate_x + plate_z + effective_speed + release_extension + release_spin_rate + stand + p_throws, data = allTogetherNow)
+  summary(extlm)
+```
+
+```{r handedness}
+  AtBatsHands <- mutate(AtBats, opposing = ifelse(Batter.Hand == Pitcher.Hand, 0, 1))
+  handlm <- lm(`Number.of.Pitches` ~ opposing, data = AtBatsHands)
+  summary(handlm)
+```
