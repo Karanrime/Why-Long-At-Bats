@@ -114,7 +114,7 @@ public class AtBatAggregator {
 			scanner.close();
 			writer = new PrintWriter(new File("2025RegularSeasonAllAtBats.csv"));
 			writer.write("Game Date, Batter Last Name, Batter First Name ,Batter ID, PitcherID, Batter Hand, Pitcher Hand, Game ID, Number of Pitches, Outcome,"
-					+ "Batting Team, Pitching Team, Num Balls, Num Strikes, Contact, Batter Age, Pitcher Age, At Bat Number, DummyColumn \n");
+					+ "Batting Team, Pitching Team, Num Balls, Num Strikes, Contact, Batter Age, Pitcher Age, At Bat Number, DummyColumn, \n");
 			for (AtBat atbat : atBats) {
 				writer.write(atbat.toString());
 			}
