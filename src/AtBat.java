@@ -44,8 +44,8 @@ public class AtBat {
 	}
 
 	public String toString() {
-		String str = gameDate + "," + batterLName + "," + batterFName + "," + batterID + "," + pitcherID + "," + batterHand + "," + pitcherHand + "," + gameID + "," + numPitches + 
-				"," + outcome + "," + battingTeam + "," + pitchingTeam + "," + numBalls + "," + numStrikes + "," + contact + "," + batterAge + "," + pitcherAge + "," + atBatNumber + ",,\n";
+		String str = atBatNumber + ","  + gameDate + "," + batterLName + "," + batterFName + "," + batterID + "," + pitcherID + "," + batterHand + "," + pitcherHand + "," + gameID + "," + numPitches + 
+				"," + outcome + "," + battingTeam + "," + pitchingTeam + "," + numBalls + "," + numStrikes + "," + contact + "," + batterAge + "," + pitcherAge + ",0,\n";
 		return str;
 	}
 	

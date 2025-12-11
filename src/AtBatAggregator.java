@@ -107,14 +107,15 @@ public class AtBatAggregator {
 						batterAge = Integer.parseInt(nextItem);
 					}
 				}
-				line += scanner.nextLine() + atBatNumber + ",,\n";
+				line = line.substring(0, line.length() - 2);
+				line += scanner.nextLine() + "," + atBatNumber + ",\n";
 				writer.write(line);
 				lastBatter = batterID;
 			}
 			scanner.close();
 			writer = new PrintWriter(new File("2025RegularSeasonAllAtBats.csv"));
-			writer.write("Game Date, Batter Last Name, Batter First Name ,Batter ID, PitcherID, Batter Hand, Pitcher Hand, Game ID, Number of Pitches, Outcome,"
-					+ "Batting Team, Pitching Team, Num Balls, Num Strikes, Contact, Batter Age, Pitcher Age, At Bat Number, DummyColumn, \n");
+			writer.write("At Bat Number, Game Date, Batter Last Name, Batter First Name, Batter ID, PitcherID, Batter Hand, Pitcher Hand, Game ID, Number of Pitches, Outcome,"
+					+ "Batting Team, Pitching Team, Num Balls, Num Strikes, Contact, Batter Age, Pitcher Age, DummyColumn, \n");
 			for (AtBat atbat : atBats) {
 				writer.write(atbat.toString());
 			}
